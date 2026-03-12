@@ -134,6 +134,9 @@
         .option-title { font-size: 0.85rem; color: var(--dark-gray); }
 
         .option.has-input { flex-wrap: wrap; }
+        /* ป้องกัน label forward click ไปยัง input ทำให้ toggle 2 ครั้ง */
+        .option.has-input .other-input { pointer-events: none; }
+        .option.has-input.selected .other-input { pointer-events: auto; }
         .option.has-input .other-input {
             width: 100%; margin-top: 8px; padding: 8px;
             border: 1px dashed var(--light-gray);
@@ -350,7 +353,7 @@
                             <label class="option" onclick="selectOption(this, 'department')">
                                 <input type="radio" name="department" value="procurement" style="display:none;">
                                 <span class="checkmark"></span>
-                                <span class="option-title">🌾 จัดซื้อจัดจ้าง/จัดหาวัตถุดิบ (Procurement/Raw Material)</span>
+                                <span class="option-title">🌾 จัดซื้อจัดจ้าง/จัดหาวัตถุดิบ (Procurement/Raw Material Sourcing)</span>
                             </label>
                             <label class="option" onclick="selectOption(this, 'department')">
                                 <input type="radio" name="department" value="logistics" style="display:none;">
@@ -458,27 +461,27 @@
                         <div class="level-options">
                             <div class="level-option" onclick="selectLevel(this, 0)">
                                 <div class="level-badge">L0</div>
-                                <div class="option-content"><div class="option-title">ไม่เคยใช้เลย</div></div>
+                                <div class="option-content"><div class="option-title">ไม่เคยใช้เลย (0)</div></div>
                             </div>
                             <div class="level-option" onclick="selectLevel(this, 1)">
                                 <div class="level-badge">L1</div>
-                                <div class="option-content"><div class="option-title">เคยลองใช้บ้าง 1-2 ครั้ง</div></div>
+                                <div class="option-content"><div class="option-title">เคยลองใช้บ้าง 1-2 ครั้ง (1)</div></div>
                             </div>
                             <div class="level-option" onclick="selectLevel(this, 2)">
                                 <div class="level-badge">L2</div>
-                                <div class="option-content"><div class="option-title">ใช้เป็นครั้งคราว ไม่ประจำ</div></div>
+                                <div class="option-content"><div class="option-title">ใช้เป็นครั้งคราว ไม่ประจำ (2)</div></div>
                             </div>
                             <div class="level-option" onclick="selectLevel(this, 3)">
                                 <div class="level-badge">L3</div>
-                                <div class="option-content"><div class="option-title">ใช้ประจำสัปดาห์ละ 1-2 ครั้ง</div></div>
+                                <div class="option-content"><div class="option-title">ใช้ประจำสัปดาห์ละ 1-2 ครั้ง (3)</div></div>
                             </div>
                             <div class="level-option" onclick="selectLevel(this, 4)">
                                 <div class="level-badge">L4</div>
-                                <div class="option-content"><div class="option-title">ใช้เป็นประจำทุกวัน</div></div>
+                                <div class="option-content"><div class="option-title">ใช้เป็นประจำทุกวัน (4)</div></div>
                             </div>
                             <div class="level-option" onclick="selectLevel(this, 5)">
                                 <div class="level-badge">L5</div>
-                                <div class="option-content"><div class="option-title">ใช้เป็นเครื่องมือหลักในการทำงาน</div></div>
+                                <div class="option-content"><div class="option-title">ใช้เป็นเครื่องมือหลักในการทำงาน (5)</div></div>
                             </div>
                         </div>
                     </div>
@@ -749,7 +752,7 @@
                             <div class="work-category-title">🏭 AI ช่วยการผลิตและคุณภาพ</div>
                             <div class="checkbox-grid">
                                 <label class="option checkbox" onclick="toggleCheckbox(this)"><span class="checkmark"></span><span class="option-title">วิเคราะห์ข้อมูล NIR คัดกรองรำข้าวอัตโนมัติ</span></label>
-                                <label class="option checkbox" onclick="toggleCheckbox(this)"><span class="checkmark"></span><span class="option-title">ติดตามกระบวนการผลิต Real-time รักษาออรีซานอลสูงสุด</span></label>
+                                <label class="option checkbox" onclick="toggleCheckbox(this)"><span class="checkmark"></span><span class="option-title">ติดตามกระบวนการผลิต Real-time รักษาโอรีซานอลสูงสุด</span></label>
                                 <label class="option checkbox" onclick="toggleCheckbox(this)"><span class="checkmark"></span><span class="option-title">Predictive Maintenance — พยากรณ์เครื่องจักรก่อนเสีย</span></label>
                                 <label class="option checkbox" onclick="toggleCheckbox(this)"><span class="checkmark"></span><span class="option-title">ตรวจสอบคุณภาพผลิตภัณฑ์จากภาพถ่าย (น้ำมันเลอะขวด, บรรจุภัณฑ์)</span></label>
                                 <label class="option checkbox" onclick="toggleCheckbox(this)"><span class="checkmark"></span><span class="option-title">ช่วยคำนวณสูตรผลิต/ปรับสูตร</span></label>
@@ -1099,19 +1102,24 @@
         }
 
         function toggleCheckbox(element) {
-            // ถ้า click มาจาก input ข้างใน ไม่ต้อง toggle
+            const wasSelected = element.classList.contains('selected');
             element.classList.toggle('selected');
-            // ถ้าเป็น has-input และ selected → focus input
-            if (element.classList.contains('has-input') && element.classList.contains('selected')) {
+            const isNowSelected = !wasSelected;
+            if (element.classList.contains('has-input')) {
                 const inp = element.querySelector('.other-input');
-                if (inp) setTimeout(() => inp.focus(), 50);
+                if (isNowSelected && inp) {
+                    setTimeout(() => inp.focus(), 50);
+                } else if (!isNowSelected && inp) {
+                    inp.value = ''; // clear เมื่อ deselect
+                }
             }
         }
 
         function selectRating(btn) {
             const row = btn.closest('.rating-row');
+            const wasSelected = btn.classList.contains('selected');
             row.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
+            if (!wasSelected) btn.classList.add('selected'); // กดซ้ำ = deselect
         }
 
         // ========== DYNAMIC INPUTS ==========
@@ -1137,27 +1145,15 @@
             }
         }
 
-        // ===== Helper functions (ไม่ใช้ DOMContentLoaded — script อยู่ท้าย body แล้ว) =====
+        // ===== Helper functions =====
 
-        // ป้องกัน other-input click deselect parent label
+        // stopPropagation เท่านั้น — ไม่ auto-select ให้ toggleCheckbox จัดการเอง
         function initOtherInputs() {
             document.querySelectorAll('.option.has-input .other-input').forEach(function(inp) {
-                inp.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const parent = inp.closest('.option.has-input');
-                    if (parent && !parent.classList.contains('selected')) {
-                        parent.classList.add('selected');
-                    }
-                });
-                inp.addEventListener('focus', function() {
-                    const parent = inp.closest('.option.has-input');
-                    if (parent && !parent.classList.contains('selected')) {
-                        parent.classList.add('selected');
-                    }
-                });
+                inp.addEventListener('click', function(e) { e.stopPropagation(); });
+                inp.addEventListener('mousedown', function(e) { e.stopPropagation(); });
             });
         }
-        // เรียกทันที (DOM พร้อมแล้ว เพราะ script อยู่ก่อน </body>)
         initOtherInputs();
 
         // เก็บ checkbox selected ใน container — รองรับทั้ง "อื่นๆ" และ "อื่นๆ..."
