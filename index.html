@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แบบสำรวจความต้องการใช้ AI - บริษัท น้ำมันบริโภคไทย จำกัด (v4)</title>
+    <title>แบบสำรวจความต้องการใช้ AI - บริษัท น้ำมันบริโภคไทย จำกัด (v5)</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -94,9 +94,9 @@
 
         /* ===== COLLAPSIBLE DROPDOWN ===== */
         .collapsible-category { margin-bottom: 10px; border: 1px solid var(--light-gray); border-radius: 10px; overflow: hidden; transition: all 0.3s ease; }
-        .collapsible-category.filter-locked { opacity: 0.3; order: 999; pointer-events: none; }
-        .collapsible-category.filter-locked .collapsible-header { background: #eee; cursor: not-allowed; }
-        .collapsible-category.filter-locked .collapsible-header::after { content: '🔒'; font-size: 0.75rem; margin-left: auto; }
+        .collapsible-category.filter-dimmed { opacity: 0.5; order: 100; } /* V5: จางแต่ยังกดได้ */
+        .collapsible-category.filter-dimmed .collapsible-header { background: #f5f5f5; cursor: pointer; }
+        /* V5: ลบ 🔒 — แถบไม่ตรงแผนกยังกดได้ */
         .collapsible-header { display: flex; align-items: center; padding: 10px 14px; background: var(--bg-gray); cursor: pointer; user-select: none; transition: background 0.2s; gap: 8px; }
         .collapsible-header:hover { background: var(--light-gray); }
         .collapsible-header .arrow { font-size: 0.7rem; transition: transform 0.3s; flex-shrink: 0; color: var(--primary-color); }
@@ -113,8 +113,8 @@
         .sub-group-title:first-child { margin-top: 0; }
 
         /* ===== Optional Section G ===== */
-        .optional-banner { background: linear-gradient(135deg, #FFF8E1 0%, #FFFDE7 100%); border: 2px solid var(--optional-border); border-radius: 12px; padding: 12px 16px; margin-bottom: 15px; text-align: center; }
-        .optional-banner h3 { font-size: 0.95rem; color: #F57F17; margin-bottom: 4px; }
+        .optional-banner { background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%); border: 2px solid #EF5350; border-radius: 12px; padding: 12px 16px; margin-bottom: 15px; text-align: center; }
+        .optional-banner h3 { font-size: 0.95rem; color: #D32F2F; margin-bottom: 4px; }
         .optional-banner p { font-size: 0.78rem; color: var(--medium-gray); }
 
         .progress-container { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--light-gray); z-index: 100; }
@@ -144,6 +144,46 @@
             .rating-row { flex-direction: column; align-items: flex-start; gap: 8px; }
             .rating-buttons { width: 100%; justify-content: space-between; }
         }
+
+        /* ===== V5: Smart Reorder — relevant categories ===== */
+        .collapsible-category.dept-relevant { order: -1; border: 2px solid var(--primary-color); border-radius: 10px; }
+        .collapsible-category.dept-relevant .collapsible-header { background: var(--accent-light); }
+        .collapsible-category.dept-relevant .collapsible-header::before { content: '▼'; font-size: 0.6rem; color: var(--primary-color); margin-right: 4px; }
+        .collapsible-category.dept-relevant .collapsible-header .click-hint { display: inline; }
+        /* handled by .filter-dimmed */
+        .collapsible-category.filter-dimmed:hover { opacity: 0.75; }
+        .click-hint { display: none; font-size: 0.6rem; color: var(--primary-color); margin-left: auto; padding: 2px 6px; background: var(--white); border-radius: 4px; border: 1px solid var(--primary-color); }
+        #b1Categories, #c1Categories, #gCategories { display: flex; flex-direction: column; }
+
+        /* ===== V5: E2 Search Box ===== */
+        .e2-search-wrap { position: relative; margin-bottom: 12px; }
+        .e2-search { width: 100%; padding: 10px 12px 10px 36px; border: 2px solid var(--light-gray); border-radius: 10px; font-family: inherit; font-size: 0.85rem; transition: border-color 0.3s; }
+        .e2-search:focus { outline: none; border-color: var(--primary-color); }
+        .e2-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--medium-gray); font-size: 0.9rem; }
+        .e2-search-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--white); border: 2px solid var(--primary-color); border-radius: 10px; margin-top: 4px; max-height: 250px; overflow-y: auto; z-index: 50; display: none; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .e2-search-results.show { display: block; }
+        .e2-search-item { display: flex; align-items: center; padding: 8px 12px; cursor: pointer; gap: 8px; border-bottom: 1px solid var(--light-gray); }
+        .e2-search-item:last-child { border-bottom: none; }
+        .e2-search-item:hover { background: var(--accent-light); }
+        .e2-search-item .cat-name { font-size: 0.7rem; color: var(--primary-color); background: var(--accent-light); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--primary-color); flex-shrink: 0; }
+        .e2-search-item .item-name { font-size: 0.82rem; flex: 1; }
+        .e2-search-item .item-check { width: 18px; height: 18px; border: 2px solid var(--primary-color); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--white); }
+        .e2-search-item.checked .item-check { background: var(--primary-color); }
+        .e2-search-item.checked .item-check::after { content: '✓'; }
+
+        /* ===== V5: E2 2-Column Layout ===== */
+        .e2-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        @media (max-width: 600px) { .e2-grid { grid-template-columns: 1fr; } }
+
+        /* ===== V5: F1 Compact 2-Column ===== */
+        .f1-compact-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+        .f1-compact-row { display: flex; align-items: center; padding: 6px 8px; background: var(--bg-gray); border-radius: 8px; gap: 6px; }
+        .f1-compact-label { flex: 1; font-size: 0.75rem; min-width: 0; line-height: 1.3; }
+        .f1-compact-btns { display: flex; gap: 2px; flex-shrink: 0; }
+        .f1-compact-btn { width: 26px; height: 26px; border: 1.5px solid var(--light-gray); border-radius: 5px; background: var(--white); cursor: pointer; font-weight: 500; font-size: 0.75rem; transition: all 0.2s; }
+        .f1-compact-btn:hover { border-color: var(--primary-color); }
+        .f1-compact-btn.selected { background: var(--primary-color); border-color: var(--primary-color); color: var(--white); }
+        @media (max-width: 600px) { .f1-compact-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -287,6 +327,11 @@
     </div>
     <div class="question">
         <label class="question-label">E2. เครื่องมือ AI ที่เคยใช้ (เลือกได้หลายข้อ — แต่ละตระกูลให้ติ๊กเฉพาะตัวที่เคยใช้)</label>
+        <div class="e2-search-wrap">
+            <span class="e2-search-icon">🔍</span>
+            <input type="text" class="e2-search" id="e2Search" placeholder="พิมพ์ค้นหาเครื่องมือ AI เช่น NotebookLM, NanaBanana..." oninput="searchE2(this.value)">
+            <div class="e2-search-results" id="e2SearchResults"></div>
+        </div>
         <div id="e2Categories"></div>
     </div>
     <div class="question">
@@ -409,7 +454,7 @@ const C1_DATA = [
 // DATA: E2 Categories (AI Tools — no smart filter, all depts see all)
 // ═══════════════════════════════════════════════════════════════
 const E2_DATA = [
-    { icon:'💬', label:'GenAI Chatbot พื้นฐาน', items:['ChatGPT (OpenAI)','Google Gemini / Bard','Claude (Anthropic)','Microsoft Copilot','LINE AI / OA','Perplexity AI','DeepSeek','Grok (xAI)']},
+    { icon:'💬', label:'Generative AI Chatbot พื้นฐาน', items:['ChatGPT (OpenAI)','Google Gemini / Bard','Claude (Anthropic)','Microsoft Copilot','LINE AI / OA','Perplexity AI','DeepSeek','Grok (xAI)']},
     { icon:'🟢', label:'ChatGPT Advance', items:['Deep Research (ค้นคว้าเชิงลึก)','Canvas (เขียน/แก้เอกสารร่วมกับ AI)','GPTs (สร้าง Custom AI เฉพาะงาน)','Code Interpreter (วิเคราะห์ข้อมูล/รันโค้ด)','Custom Instructions (ตั้งค่าบุคลิก AI)']},
     { icon:'🔵', label:'Gemini Advance', items:['Deep Research (Gemini ค้นคว้าเชิงลึก)','Google Workspace Extension (เชื่อม Gmail/Drive/Sheets)','Gems (สร้าง AI ผู้ช่วยเฉพาะทาง)','Schedule Task (ตั้งเวลาสั่งงาน AI อัตโนมัติ)','Google AI Studio / Imagen (สร้างภาพ)','Gemini Personal Intelligence (AI รู้จักคุณ)']},
     { icon:'🟣', label:'Claude Advance', items:['Claude Code (Coding Agent สร้างระบบด้วย AI)','MCP — Model Context Protocol (เชื่อมระบบภายนอก)','Artifacts (สร้างเอกสาร/แอป/โค้ดในหน้าจอเดียว)','Projects (จัดการโปรเจกต์/คลังความรู้ส่วนตัว)','Claude Cowork / Computer Use (AI ควบคุมคอมพิวเตอร์)','Claude Research (ค้นคว้าเชิงลึก)']},
@@ -442,20 +487,33 @@ const F1_DATA = [
 // DATA: F2 Topics
 // ═══════════════════════════════════════════════════════════════
 const F2_DATA = [
-    'AI พื้นฐาน: ChatGPT, Gemini, Claude','Prompt Engineering: วิธีสั่ง AI ให้ได้ผลลัพธ์ที่ต้องการ',
-    'AI สำหรับงานเอกสาร (สรุป, แปลง, ตรวจสอบ)','AI สำหรับงานบัญชี/การเงิน',
-    'AI สำหรับงานผลิต/QC (ควบคุมคุณภาพ, วิเคราะห์ภาพ)','AI สำหรับจัดซื้อ (เปรียบเทียบราคา, ประเมิน Supplier)',
-    'AI สำหรับควบคุมต้นทุน/วางแผนการผลิต','AI สำหรับงานขาย/การตลาด (วิเคราะห์ยอด, สร้างคอนเทนต์)',
-    'AI สำหรับซัพพลายเชน/โลจิสติกส์ (Route, พยากรณ์วัตถุดิบ)',
-    'AI สำหรับวิเคราะห์ภาพ (Computer Vision — ตรวจคุณภาพ, PPE, นับสินค้า)',
-    'AI สำหรับ HR (คัดกรองใบสมัคร, ตอบคำถามพนักงาน)','ความปลอดภัยข้อมูลเมื่อใช้ AI',
-    'AI เชื่อมระบบ ERP/Power BI เพื่อดึงข้อมูลผ่าน LINE','AI Sales Flow Management — จัดการกระบวนการขายข้ามกลุ่ม LINE',
-    'AI Sentiment Analysis — ตรวจจับอารมณ์ลูกค้า/พนักงานจากแชท',
-    'AI Agent & Automation — สร้าง AI ที่ทำงานแทนทั้งทีม / ตั้งเวลาสั่งงาน / Browser Use',
-    'No-Code AI App — สร้างแอปธุรกิจด้วยภาษาธรรมชาติ ไม่ต้องเขียนโค้ด (Lovable/Base44)',
-    'AI Video & Content Production — สร้างวิดีโอ/Podcast/Infographic ด้วย AI (HeyGen/NotebookLM)',
-    'AI สำหรับ HR ครบวงจร — Sourcing → Screening → Interview → Onboarding → Career Path → Retention',
-    'AI Formulation R&D — ช่วยนักวิจัยพัฒนาสูตรนวัตกรรม ลดการทดลองซ้ำ'
+    'AI พื้นฐาน: ChatGPT, Gemini, Claude — เข้าใจความสามารถและเลือกใช้ตามงาน',
+    'Prompt Engineering: วิธีสั่ง AI ให้ได้ผลลัพธ์ที่ต้องการ [F073]',
+    'เทคนิคแก้ปัญหา AI ให้ข้อมูลผิดพลาด (Anti-Hallucination) [F030, F039]',
+    'AI สรุปเอกสาร/สร้างรายงาน/ถอดประชุม (NotebookLM, Gemini) [F001, F010, F069]',
+    'AI ทำสไลด์นำเสนอ (NanaBanana, NotebookLM Studio) [F051, F071]',
+    'AI แก้ไข PDF/Slide ลบ Logo (Minus.ai) [F031]',
+    'AI ทำ Excel/Google Sheets เร็วขึ้น 10 เท่า (Gemini, Claude in Excel) [F022, F034, F038]',
+    'AI สร้างแบบฟอร์มอัตโนมัติ (Google Form + Gemini) [F005]',
+    'AI แปลซับไตเติ้ล/แปลภาษา (Sayonari AI) [F028]',
+    'AI จัดการความรู้องค์กร (NotebookLM + Gemini Strategy) [F001, F025, F069]',
+    'AI วิเคราะห์งานวิจัย/เปรียบเทียบข้อมูล (Research Rabbit, LM Arena) [F023, F024]',
+    'AI Gem + Deep Research — ค้นคว้าเชิงลึกแบบมืออาชีพ [F074]',
+    'AI สร้างภาพ/กราฟิก (Google AI Studio, NanaBanana, Magic99, Qwen) [F003, F026, F050, F051]',
+    'AI สร้างวิดีโอ/คลิปขายสินค้า (HeyGen, PD Autoflow, Triple Bot) [F008, F009, F049]',
+    'AI สร้างอินโฟกราฟิก (Gemini) [F040]',
+    'ตั้งค่า Gemini Advanced 6 เทคนิค (Custom Instructions, Extension, Schedule Task) [F002]',
+    'สร้าง AI ผู้ช่วยส่วนตัว (Gemini Gems, Custom Instructions) [F029, F030, F048]',
+    'Claude Cowork — AI Agent จัดการไฟล์/สร้างรายงาน/เลขา AI [F056-F060, F066, F075]',
+    'AI Agent ทำงานแทน (OpenClaw, Browser Use, Manus AI) [F017, F020, F054, F067]',
+    'AI Automation ตั้งเวลาสั่งงาน (Grok Task, Claude Schedule, Workspace Studio) [F019, F045, F047, F072]',
+    'สร้างแอปธุรกิจไม่ต้องเขียนโค้ด (Lovable, Base44, Google Stitch) [F012, F013, F043]',
+    'AI สำหรับงานบัญชี/การเงิน (PEAK Accounting, Xynth AI) [F027, F042]',
+    'AI วิเคราะห์เทรนด์ตลาด (Google Trends + Gemini) [F004, F041]',
+    'AI วิเคราะห์โฆษณา Facebook/TikTok อัตโนมัติ [F032, F037, F053]',
+    'AI Affiliate Marketing — กลยุทธ์สร้างยอดขาย [F063]',
+    'ความปลอดภัยข้อมูลเมื่อใช้ AI / Cybersecurity Automation [F076]',
+    'Perplexity AI ขั้นสูง 7 ฟีเจอร์ + Perplexity Computer [F046, F064, F077]'
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -497,7 +555,7 @@ const G_DATA = [
 // BUILD FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 
-function buildCollapsibleCategories(data, containerId, useSmartFilter) {
+function buildCollapsibleCategories(data, containerId, useSmartFilter, useE2Grid) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
     data.forEach((cat, idx) => {
@@ -524,31 +582,40 @@ function buildCollapsibleCategories(data, containerId, useSmartFilter) {
             bodyHTML += `<label class="option checkbox has-input" onclick="toggleCheckbox(this)"><span class="checkmark"></span><span class="option-title">อื่นๆ...</span><input type="text" class="other-input" placeholder="ระบุ..." onclick="event.stopPropagation()"></label></div>`;
         }
         div.innerHTML = `
-            <div class="collapsible-header" onclick="toggleCollapsible(this)">
+            <div class="collapsible-header" onclick="toggleCollapsible(this${useE2Grid ? ',true' : ''})">
                 <span class="arrow">▶</span>
                 <span class="cat-icon">${cat.icon}</span>
                 <span class="cat-label">${cat.label}</span>
                 <span class="cat-count">0 เลือก</span>
+                ${useSmartFilter ? '<span class="click-hint">คลิก</span>' : ''}
             </div>
             <div class="collapsible-body">${bodyHTML}</div>`;
         container.appendChild(div);
     });
+    if (useE2Grid) {
+        // Wrap categories in 2-column grid
+        const wrapper = document.createElement('div');
+        wrapper.className = 'e2-grid';
+        while (container.firstChild) wrapper.appendChild(container.firstChild);
+        container.appendChild(wrapper);
+    }
 }
 
 function buildF1() {
     const grid = document.getElementById('f1RatingGrid');
     grid.innerHTML = '';
+    grid.className = 'f1-compact-grid';
     F1_DATA.forEach(label => {
         const row = document.createElement('div');
-        row.className = 'rating-row';
-        row.innerHTML = `<span class="rating-label">${label}</span><div class="rating-buttons">${[1,2,3,4,5].map(n=>`<button class="rating-btn" onclick="selectRating(this)">${n}</button>`).join('')}</div>`;
+        row.className = 'f1-compact-row';
+        row.innerHTML = `<span class="f1-compact-label">${label}</span><div class="f1-compact-btns">${[1,2,3,4,5].map(n=>`<button class="f1-compact-btn" onclick="selectRating(this)">${n}</button>`).join('')}</div>`;
         grid.appendChild(row);
     });
-    // Other row
     const otherRow = document.createElement('div');
-    otherRow.className = 'rating-row';
+    otherRow.className = 'f1-compact-row';
     otherRow.id = 'expectationOtherRow';
-    otherRow.innerHTML = `<div class="rating-label" style="display:flex;align-items:center;gap:8px"><span>อื่นๆ</span><input type="text" id="expectationOtherText" class="dotted-input" placeholder="โปรดระบุ..." style="flex:1;min-width:100px"></div><div class="rating-buttons">${[1,2,3,4,5].map(n=>`<button class="rating-btn" onclick="selectRating(this)">${n}</button>`).join('')}</div>`;
+    otherRow.style.gridColumn = '1 / -1';
+    otherRow.innerHTML = `<div class="f1-compact-label" style="display:flex;align-items:center;gap:6px"><span>อื่นๆ</span><input type="text" id="expectationOtherText" class="dotted-input" placeholder="โปรดระบุ..." style="flex:1;min-width:80px;font-size:0.75rem"></div><div class="f1-compact-btns">${[1,2,3,4,5].map(n=>`<button class="f1-compact-btn" onclick="selectRating(this)">${n}</button>`).join('')}</div>`;
     grid.appendChild(otherRow);
 }
 
@@ -567,32 +634,34 @@ function buildF2() {
 function applySmartFilter() {
     const tag = DEPT_TAGS[selectedDepartment] || '_ALL_';
     document.querySelectorAll('.collapsible-category[data-filter]').forEach(cat => {
+        // V5: Clear all filter classes first
+        cat.classList.remove('dept-relevant', 'filter-dimmed', 'filter-locked');
+
+        // IT, ผู้บริหาร, อื่นๆ = _ALL_ → เห็นทุกหมวดปกติ ไม่จาง ไม่เรียงพิเศษ
+        if (tag === '_ALL_') return;
+
         const filterData = cat.dataset.filter;
-        let allowed = false;
-        if (filterData === '_SHARED_' || tag === '_ALL_') {
-            allowed = true;
+        let isRelevant = false;
+        if (filterData === '_SHARED_') {
+            isRelevant = true;
         } else {
             try {
                 const tags = JSON.parse(filterData);
-                allowed = tags.includes(tag);
-            } catch(e) { allowed = true; }
+                isRelevant = tags.includes(tag);
+            } catch(e) { isRelevant = true; }
         }
-        if (allowed) {
-            cat.classList.remove('filter-locked');
+
+        if (isRelevant) {
+            // V5: แถบตรงแผนก → ชัด + ตีกรอบ + เลื่อนขึ้นบน
+            cat.classList.add('dept-relevant');
         } else {
-            cat.classList.add('filter-locked');
-            // ปิด dropdown ที่ถูก lock + ล้าง selection
+            // V5: แถบไม่ตรงแผนก → จางแต่ยังกดได้ (ไม่ lock)
+            cat.classList.add('filter-dimmed');
+            // ยุบ dropdown (แต่ไม่ล้าง selection — กดเปิดเองได้)
             const body = cat.querySelector('.collapsible-body');
             const arrow = cat.querySelector('.arrow');
             if (body) body.classList.remove('open');
             if (arrow) arrow.classList.remove('open');
-            cat.querySelectorAll('.option.checkbox.selected').forEach(opt => {
-                opt.classList.remove('selected');
-                const inp = opt.querySelector('.other-input');
-                if (inp) inp.value = '';
-            });
-            const badge = cat.querySelector('.cat-count');
-            if (badge) badge.textContent = '0 เลือก';
         }
     });
 }
@@ -600,10 +669,21 @@ function applySmartFilter() {
 // ═══════════════════════════════════════════════════════════════
 // COLLAPSIBLE TOGGLE
 // ═══════════════════════════════════════════════════════════════
-function toggleCollapsible(header) {
+function toggleCollapsible(header, accordion) {
     const body = header.nextElementSibling;
     const arrow = header.querySelector('.arrow');
     const isOpen = body.classList.contains('open');
+    // Accordion mode: close all siblings first
+    if (accordion && !isOpen) {
+        const parent = header.closest('.e2-grid') || header.closest('.collapsible-category').parentElement;
+        if (parent) {
+            parent.querySelectorAll('.collapsible-body.open').forEach(b => {
+                b.classList.remove('open');
+                const a = b.previousElementSibling.querySelector('.arrow');
+                if (a) a.classList.remove('open');
+            });
+        }
+    }
     body.classList.toggle('open');
     arrow.classList.toggle('open');
 }
@@ -641,7 +721,12 @@ function showStep(step) {
     else { document.getElementById('nextBtn').textContent = 'ถัดไป →'; }
 }
 function nextStep() {
-    if (currentStep === totalSteps) { submitSurvey(); }
+    if (currentStep === totalSteps) {
+        // V5: Confirm dialog before submit
+        if (confirm('ยืนยันการส่งแบบสอบถาม?\n\nกด OK เพื่อส่ง หรือ Cancel เพื่อกลับไปตรวจสอบ')) {
+            submitSurvey();
+        }
+    }
     else if (currentStep < totalSteps) { currentStep++; showStep(currentStep); updateStepIndicator(); updateProgress(); window.scrollTo({top:0,behavior:'smooth'}); }
 }
 function prevStep() {
@@ -679,9 +764,9 @@ function toggleCheckbox(el) {
     if (cat) updateCatCount(cat);
 }
 function selectRating(btn) {
-    const row = btn.closest('.rating-row');
+    const row = btn.closest('.rating-row') || btn.closest('.f1-compact-row');
     const was = btn.classList.contains('selected');
-    row.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('selected'));
+    row.querySelectorAll('.rating-btn,.f1-compact-btn').forEach(b => b.classList.remove('selected'));
     if (!was) btn.classList.add('selected');
 }
 function selectFreq(el) {
@@ -819,7 +904,7 @@ function resetSurvey() {
     document.querySelectorAll('.collapsible-body').forEach(b => b.classList.remove('open'));
     document.querySelectorAll('.arrow').forEach(a => a.classList.remove('open'));
     document.querySelectorAll('.cat-count').forEach(c => c.textContent = '0 เลือก');
-    document.querySelectorAll('.collapsible-category').forEach(c => c.classList.remove('filter-locked'));
+    document.querySelectorAll('.collapsible-category').forEach(c => { c.classList.remove('filter-locked','filter-dimmed','dept-relevant'); });
     showStep(1); updateStepIndicator(); updateProgress();
     window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -847,10 +932,10 @@ async function submitSurvey() {
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
-buildCollapsibleCategories(B1_DATA, 'b1Categories', true);
-buildCollapsibleCategories(C1_DATA, 'c1Categories', true);
-buildCollapsibleCategories(E2_DATA, 'e2Categories', false);
-buildCollapsibleCategories(G_DATA, 'gCategories', true);
+buildCollapsibleCategories(B1_DATA, 'b1Categories', true, false);
+buildCollapsibleCategories(C1_DATA, 'c1Categories', true, false);
+buildCollapsibleCategories(E2_DATA, 'e2Categories', false, true);
+buildCollapsibleCategories(G_DATA, 'gCategories', true, false);
 buildF1();
 buildF2();
 showStep(1);
@@ -862,6 +947,76 @@ document.querySelectorAll('.option.has-input .other-input').forEach(inp => {
     inp.addEventListener('click', e => e.stopPropagation());
     inp.addEventListener('mousedown', e => e.stopPropagation());
 });
+
+// ═══════════════════════════════════════════════════════════════
+// V5: E2 SEARCH
+// ═══════════════════════════════════════════════════════════════
+function searchE2(query) {
+    const results = document.getElementById('e2SearchResults');
+    if (!query || query.length < 1) { results.classList.remove('show'); results.innerHTML = ''; return; }
+    const q = query.toLowerCase();
+    let html = '';
+    E2_DATA.forEach(cat => {
+        const allItems = cat.items || [];
+        allItems.forEach(item => {
+            if (item.toLowerCase().includes(q)) {
+                const isChecked = isE2ItemChecked(cat.label, item);
+                html += `<div class="e2-search-item ${isChecked?'checked':''}" onclick="toggleE2SearchItem(this,'${cat.label.replace(/'/g,"\\'")}','${item.replace(/'/g,"\\'")}')">
+                    <span class="cat-name">${cat.icon} ${cat.label}</span>
+                    <span class="item-name">${item}</span>
+                    <span class="item-check"></span>
+                </div>`;
+            }
+        });
+    });
+    if (html) { results.innerHTML = html; results.classList.add('show'); }
+    else { results.innerHTML = '<div style="padding:12px;text-align:center;color:#999;font-size:0.8rem">ไม่พบผลลัพธ์</div>'; results.classList.add('show'); }
+}
+
+function isE2ItemChecked(catLabel, itemText) {
+    const cats = document.querySelectorAll('#e2Categories .collapsible-category, #e2Categories .e2-grid .collapsible-category');
+    for (const cat of cats) {
+        const label = cat.querySelector('.cat-label');
+        if (label && label.textContent.trim() === catLabel) {
+            const opts = cat.querySelectorAll('.option.checkbox');
+            for (const opt of opts) {
+                const title = opt.querySelector('.option-title');
+                if (title && title.textContent.trim() === itemText && opt.classList.contains('selected')) return true;
+            }
+        }
+    }
+    return false;
+}
+
+function toggleE2SearchItem(el, catLabel, itemText) {
+    // Find and toggle the actual checkbox in E2
+    const cats = document.querySelectorAll('#e2Categories .collapsible-category, #e2Categories .e2-grid .collapsible-category');
+    for (const cat of cats) {
+        const label = cat.querySelector('.cat-label');
+        if (label && label.textContent.trim() === catLabel) {
+            const opts = cat.querySelectorAll('.option.checkbox');
+            for (const opt of opts) {
+                const title = opt.querySelector('.option-title');
+                if (title && title.textContent.trim() === itemText) {
+                    toggleCheckbox(opt);
+                    // Update search result appearance
+                    el.classList.toggle('checked');
+                    updateCatCount(cat);
+                    return;
+                }
+            }
+        }
+    }
+}
+
+// Close search results when clicking outside
+document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.e2-search-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+        document.getElementById('e2SearchResults').classList.remove('show');
+    }
+});
+
 </script>
 </body>
 </html>
