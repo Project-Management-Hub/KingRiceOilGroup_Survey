@@ -94,8 +94,9 @@
 
         /* ===== COLLAPSIBLE DROPDOWN ===== */
         .collapsible-category { margin-bottom: 10px; border: 1px solid var(--light-gray); border-radius: 10px; overflow: hidden; transition: all 0.3s ease; }
-        .collapsible-category.filter-hidden { opacity: 0.35; order: 999; }
-        .collapsible-category.filter-hidden .cat-header { background: #f0f0f0; }
+        .collapsible-category.filter-locked { opacity: 0.3; order: 999; pointer-events: none; }
+        .collapsible-category.filter-locked .collapsible-header { background: #eee; cursor: not-allowed; }
+        .collapsible-category.filter-locked .collapsible-header::after { content: '🔒'; font-size: 0.75rem; margin-left: auto; }
         .collapsible-header { display: flex; align-items: center; padding: 10px 14px; background: var(--bg-gray); cursor: pointer; user-select: none; transition: background 0.2s; gap: 8px; }
         .collapsible-header:hover { background: var(--light-gray); }
         .collapsible-header .arrow { font-size: 0.7rem; transition: transform 0.3s; flex-shrink: 0; color: var(--primary-color); }
@@ -568,19 +569,31 @@ function applySmartFilter() {
     const tag = DEPT_TAGS[selectedDepartment] || '_ALL_';
     document.querySelectorAll('.collapsible-category[data-filter]').forEach(cat => {
         const filterData = cat.dataset.filter;
+        let allowed = false;
         if (filterData === '_SHARED_' || tag === '_ALL_') {
-            cat.classList.remove('filter-hidden');
-            return;
+            allowed = true;
+        } else {
+            try {
+                const tags = JSON.parse(filterData);
+                allowed = tags.includes(tag);
+            } catch(e) { allowed = true; }
         }
-        try {
-            const tags = JSON.parse(filterData);
-            if (tags.includes(tag)) {
-                cat.classList.remove('filter-hidden');
-            } else {
-                cat.classList.add('filter-hidden');
-            }
-        } catch(e) {
-            cat.classList.remove('filter-hidden');
+        if (allowed) {
+            cat.classList.remove('filter-locked');
+        } else {
+            cat.classList.add('filter-locked');
+            // ปิด dropdown ที่ถูก lock + ล้าง selection
+            const body = cat.querySelector('.collapsible-body');
+            const arrow = cat.querySelector('.arrow');
+            if (body) body.classList.remove('open');
+            if (arrow) arrow.classList.remove('open');
+            cat.querySelectorAll('.option.checkbox.selected').forEach(opt => {
+                opt.classList.remove('selected');
+                const inp = opt.querySelector('.other-input');
+                if (inp) inp.value = '';
+            });
+            const badge = cat.querySelector('.cat-count');
+            if (badge) badge.textContent = '0 เลือก';
         }
     });
 }
@@ -807,7 +820,7 @@ function resetSurvey() {
     document.querySelectorAll('.collapsible-body').forEach(b => b.classList.remove('open'));
     document.querySelectorAll('.arrow').forEach(a => a.classList.remove('open'));
     document.querySelectorAll('.cat-count').forEach(c => c.textContent = '0 เลือก');
-    document.querySelectorAll('.collapsible-category').forEach(c => c.classList.remove('filter-hidden'));
+    document.querySelectorAll('.collapsible-category').forEach(c => c.classList.remove('filter-locked'));
     showStep(1); updateStepIndicator(); updateProgress();
     window.scrollTo({top:0,behavior:'smooth'});
 }
